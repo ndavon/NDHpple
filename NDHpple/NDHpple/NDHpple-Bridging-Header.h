@@ -6,8 +6,8 @@
 //  Copyright (c) 2014 Nicolai Davidsson. All rights reserved.
 //
 
-#ifndef NDHpple_NDHpple_Bridging_Header_h
-#define NDHpple_NDHpple_Bridging_Header_h
-
-
-#endif
+#import <libxml/tree.h>
+#import <libxml/parser.h>
+#import <libxml/HTMLparser.h>
+#import <libxml/xpath.h>
+#import <libxml/xpathInternals.h>
