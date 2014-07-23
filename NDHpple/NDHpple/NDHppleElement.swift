@@ -20,7 +20,7 @@ enum NDHppleNodeKey: String {
 
 class NDHppleElement {
     
-    typealias Node = Dictionary<String, AnyObject>
+    typealias Node = [String:AnyObject]
     let node: Node
     weak var parent: NDHppleElement?
     
@@ -40,35 +40,17 @@ class NDHppleElement {
         return self.node[key]
     }
 
-    var description: String {
+    var description: String { return self.node.description }
+    
+    var hasChildren: Bool { return self[NDHppleNodeKey.Children.toRaw()] as? Int != nil }
+    
+    var isTextNode: Bool { return self.tagName? == "text" && self.content }
 
-        return self.node.description
-    }
+    var raw: String? { return self["raw"] as? String }
     
-    var hasChildren: Bool {
+    var content: String? { return self[NDHppleNodeKey.Content.toRaw()] as? String }
     
-        return self[NDHppleNodeKey.Children.toRaw()] != nil
-    }
-    
-    var isTextNode: Bool {
-    
-        return self.tagName? == "text" && self.content
-    }
-
-    var raw: String? {
-    
-        return self["raw"] as? String
-    }
-    
-    var content: String? {
-    
-        return self[NDHppleNodeKey.Content.toRaw()] as? String
-    }
-    
-    var tagName: String? {
-    
-        return self[NDHppleNodeKey.Name.toRaw()] as? String
-    }
+    var tagName: String? { return self[NDHppleNodeKey.Name.toRaw()] as? String }
     
     var children: Array<NDHppleElement>? {
     
@@ -76,52 +58,34 @@ class NDHppleElement {
         return children?.map{ NDHppleElement(node: $0, parent: self) }
     }
     
-    var firstChild: NDHppleElement? {
+    var firstChild: NDHppleElement? { return self.children?[0] }
     
-        return self.children?[0]
-    }
+    func childrenWithTagName(tagName: String) -> Array<NDHppleElement>? { return self.children?.filter{ $0.tagName == tagName } }
     
-    func childrenWithTagName(tagName: String) -> Array<NDHppleElement>? {
-        
-        return self.children?.filter{ $0.tagName == tagName }
-    }
+    func firstChildWithTagName(tagName: String) -> NDHppleElement? { return self.childrenWithTagName(tagName)?[0] }
     
-    func firstChildWithTagName(tagName: String) -> NDHppleElement? {
-        
-        return self.childrenWithTagName(tagName)?[0]
-    }
+    func childrenWithClassName(className: String) -> Array<NDHppleElement>? { return self.children?.filter{ $0["class"] as? String == className } }
     
-    func childrenWithClassName(className: String) -> Array<NDHppleElement>? {
-        
-        return self.children?.filter{ $0["class"] as? String == className }
-    }
+    func firstChildWithClassName(className: String) -> NDHppleElement? { return self.childrenWithClassName(className)?[0] }
     
-    func firstChildWithClassName(className: String) -> NDHppleElement? {
-        
-        return self.childrenWithClassName(className)?[0]
-    }
+    var firstTextChild: NDHppleElement? { return self.firstChildWithTagName("text") }
     
-    var firstTextChild: NDHppleElement? {
-    
-        return self.firstChildWithTagName("text")
-    }
-    
-    var text: String? {
-    
-        return self.firstTextChild?.content
-    }
+    var text: String? { return self.firstTextChild?.content }
     
     var attributes: Dictionary<String, AnyObject> {
     
         var translatedAttribtues = Dictionary<String, AnyObject>()
-        for attributeDict in self[NDHppleNodeKey.AttributeArray.toRaw()] as Array<Dictionary<String, AnyObject>> {
+        if let attributeArray = self[NDHppleNodeKey.AttributeArray.toRaw()] as? Array<Dictionary<String, AnyObject>> {
             
-            if attributeDict[NDHppleNodeKey.Content.toRaw()] && attributeDict[NDHppleNodeKey.AttributeName.toRaw()] {
+            for attributeDict in attributeArray {
             
-                let value : AnyObject = attributeDict[NDHppleNodeKey.Content.toRaw()]!
-                let key : AnyObject = attributeDict[NDHppleNodeKey.AttributeName.toRaw()]!
+                if attributeDict[NDHppleNodeKey.Content.toRaw()] && attributeDict[NDHppleNodeKey.AttributeName.toRaw()] {
+            
+                    let value : AnyObject = attributeDict[NDHppleNodeKey.Content.toRaw()]!
+                    let key : AnyObject = attributeDict[NDHppleNodeKey.AttributeName.toRaw()]!
                 
-                translatedAttribtues.updateValue(value, forKey: key as String)
+                    translatedAttribtues.updateValue(value, forKey: key as String)
+                }
             }
         }
             

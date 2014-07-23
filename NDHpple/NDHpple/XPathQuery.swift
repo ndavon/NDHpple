@@ -14,27 +14,27 @@ func createNode(currentNode: xmlNodePtr, inout parentDictionary: Dictionary<Stri
     
     if currentNode.memory.name.getLogicValue() {
         
-        let name = String.fromCString(CString(currentNode.memory.name))
-        resultForNode.updateValue(name, forKey: NDHppleNodeKey.Name.toRaw())
+        let name = String.fromCString(UnsafePointer<Int8>(currentNode.memory.name))
+        resultForNode.updateValue(name!, forKey: NDHppleNodeKey.Name.toRaw())
     }
     
     if currentNode.memory.content.getLogicValue() {
 
-        let cstring = CString(currentNode.memory.content)
+        let cstring = UnsafePointer<Int8>(currentNode.memory.content)
         let content = String.fromCString(cstring)
         if resultForNode[NDHppleNodeKey.Name.toRaw()] as AnyObject? as? String == "text" {
             
             if parentContent {
                 
-                parentDictionary.updateValue(content, forKey: NDHppleNodeKey.Content.toRaw())
+                parentDictionary.updateValue(content!, forKey: NDHppleNodeKey.Content.toRaw())
                 return nil
             }
             
-            resultForNode.updateValue(content, forKey: NDHppleNodeKey.Content.toRaw())
+            resultForNode.updateValue(content!, forKey: NDHppleNodeKey.Content.toRaw())
             return resultForNode
         } else {
             
-            resultForNode.updateValue(content, forKey: NDHppleNodeKey.Content.toRaw())
+            resultForNode.updateValue(content!, forKey: NDHppleNodeKey.Content.toRaw())
         }
     }
     
@@ -49,7 +49,7 @@ func createNode(currentNode: xmlNodePtr, inout parentDictionary: Dictionary<Stri
             let attributeName = attribute.memory.name
             if attributeName.getLogicValue() {
                 
-                attributeDictionary.updateValue(String.fromCString(CString(attributeName)), forKey: NDHppleNodeKey.AttributeName.toRaw())
+                attributeDictionary.updateValue(String.fromCString(UnsafePointer<Int8>(attributeName))!, forKey: NDHppleNodeKey.AttributeName.toRaw())
             }
             
             if attribute.memory.children.getLogicValue() {
@@ -97,7 +97,7 @@ func createNode(currentNode: xmlNodePtr, inout parentDictionary: Dictionary<Stri
     
     let buffer = xmlBufferCreate()
     xmlNodeDump(buffer, currentNode.memory.doc, currentNode, 0, 0)
-    resultForNode.updateValue(String.fromCString(CString(buffer.memory.content)), forKey: "raw")
+    resultForNode.updateValue(String.fromCString(UnsafePointer<Int8>(buffer.memory.content))!, forKey: "raw")
     xmlBufferFree(buffer)
     
     return resultForNode
@@ -109,28 +109,28 @@ func PerformXPathQuery(data: NSString, query: String, isXML: Bool) -> Array<Dict
     
     let bytes = data.cStringUsingEncoding(NSUTF8StringEncoding)
     let length = CInt(data.lengthOfBytesUsingEncoding(NSUTF8StringEncoding))
-    let url = "" as CString
+    let url = ""
     let encoding = CFStringGetCStringPtr(nil, 0)
     let options: CInt = isXML ? 1 : ((1 << 5) | (1 << 6))
     
     var function = isXML ? xmlReadMemory : htmlReadMemory
     let doc = function(bytes, length, url, encoding, options)
-    
+
     if doc.getLogicValue() {
         
         let xPathCtx = xmlXPathNewContext(doc)
         if xPathCtx {
-            
+
             var queryBytes = query.cStringUsingEncoding(NSUTF8StringEncoding)!
-            let ptr: CMutablePointer<CChar> = &queryBytes
+            let ptr = ConstUnsafePointer<CChar>(queryBytes)
             
-            let xPathObj = xmlXPathEvalExpression(UnsafePointer<CUnsignedChar>(ptr.value), xPathCtx)
+            let xPathObj = xmlXPathEvalExpression(UnsafePointer<CUnsignedChar>(ptr), xPathCtx)
             if xPathObj.getLogicValue() {
                 
                 let nodes = xPathObj.memory.nodesetval
                 if nodes.getLogicValue() {
                     
-                    var resultNodes  = Array<Dictionary<String, AnyObject>>()
+                    var resultNodes = Array<Dictionary<String, AnyObject>>()
                     let nodesArray = UnsafeArray(start: nodes.memory.nodeTab, length: Int(nodes.memory.nodeNr))
                     var dummy = Dictionary<String, AnyObject>()
                     for rawNode in nodesArray {
