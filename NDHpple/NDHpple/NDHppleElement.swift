@@ -105,26 +105,28 @@ class NDHppleElement {
     
         return self.firstChildWithTagName("text")
     }
-    
-    var text: String? {
-    
-        return self.firstTextChild?.content
-    }
-    
-    var attributes: Dictionary<String, AnyObject> {
-    
-        var translatedAttribtues = Dictionary<String, AnyObject>()
-        for attributeDict in self[NDHppleNodeKey.AttributeArray.toRaw()] as Array<Dictionary<String, AnyObject>> {
-            
-            if attributeDict[NDHppleNodeKey.Content.toRaw()] && attributeDict[NDHppleNodeKey.AttributeName.toRaw()] {
-            
-                let value : AnyObject = attributeDict[NDHppleNodeKey.Content.toRaw()]!
-                let key : AnyObject = attributeDict[NDHppleNodeKey.AttributeName.toRaw()]!
-                
-                translatedAttribtues.updateValue(value, forKey: key as String)
-            }
-        }
-            
-        return translatedAttribtues
+	
+	var text: String? {
+	
+		return self.firstTextChild?.content
+	}
+	
+	var attributes: Dictionary<String, AnyObject> {
+	
+		var translatedAttribtues = Dictionary<String, AnyObject>()
+		if let attrs : AnyObject=self[NDHppleNodeKey.AttributeArray.toRaw()]
+		{
+			for attributeDict in attrs as Array<Dictionary<String, AnyObject>> {
+				
+				if attributeDict[NDHppleNodeKey.Content.toRaw()] && attributeDict[NDHppleNodeKey.AttributeName.toRaw()] {
+					
+					let value : AnyObject = attributeDict[NDHppleNodeKey.Content.toRaw()]!
+					let key : AnyObject = attributeDict[NDHppleNodeKey.AttributeName.toRaw()]!
+					
+					translatedAttribtues.updateValue(value, forKey: key as String)
+				}
+			}
+		}
+		return translatedAttribtues
     }
 }
