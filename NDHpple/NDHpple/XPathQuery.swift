@@ -113,9 +113,9 @@ func PerformXPathQuery(data: NSString, query: String, isXML: Bool) -> Array<Dict
     let encoding = CFStringGetCStringPtr(nil, 0)
     let options: CInt = isXML ? 1 : ((1 << 5) | (1 << 6))
     
-    var function = isXML ? xmlReadMemory : htmlReadMemory
+    let function = isXML ? xmlReadMemory : htmlReadMemory
     let doc = function(bytes, length, url, encoding, options)
-
+    
     if doc.getLogicValue() {
         
         let xPathCtx = xmlXPathNewContext(doc)

@@ -72,14 +72,15 @@ class NDHppleElement {
     
     var text: String? { return self.firstTextChild?.content }
     
-    var attributes: Dictionary<String, AnyObject> {
+    var attributes: [String:AnyObject] {
     
-        var translatedAttribtues = Dictionary<String, AnyObject>()
+        var translatedAttribtues = [String:AnyObject]()
         if let attributeArray = self[NDHppleNodeKey.AttributeArray.toRaw()] as? Array<Dictionary<String, AnyObject>> {
             
             for attributeDict in attributeArray {
             
-                if attributeDict[NDHppleNodeKey.Content.toRaw()] && attributeDict[NDHppleNodeKey.AttributeName.toRaw()] {
+                if attributeDict[NDHppleNodeKey.Content.toRaw()] && attributeDict[NDHppleNodeKey.AttributeName.toRaw()]
+                {
             
                     let value : AnyObject = attributeDict[NDHppleNodeKey.Content.toRaw()]!
                     let key : AnyObject = attributeDict[NDHppleNodeKey.AttributeName.toRaw()]!

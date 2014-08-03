@@ -19,9 +19,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             
             let html = NSString(data: data, encoding: NSUTF8StringEncoding)
             let parser = NDHpple(HTMLData: html)
-            let xpath = "/html/body/div/div[2]/div/div[2]/p[@class='title']/a"
+            let xpath = "/html/body/div[3]/div[3]/div/div/div[2]/p[@class='title']/a"
             let titles = parser.searchWithXPathQuery(xpath)!
-
+            
             for node in titles {
                 
                 println(node.firstChild?.content?)
