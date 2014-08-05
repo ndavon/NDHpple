@@ -20,7 +20,7 @@ enum NDHppleNodeKey: String {
 
 class NDHppleElement {
     
-    typealias Node = [String:AnyObject]
+    typealias Node = Dictionary<String, AnyObject>
     let node: Node
     weak var parent: NDHppleElement?
     
@@ -44,7 +44,7 @@ class NDHppleElement {
     
     var hasChildren: Bool { return self[NDHppleNodeKey.Children.toRaw()] as? Int != nil }
     
-    var isTextNode: Bool { return self.tagName? == "text" && self.content }
+    var isTextNode: Bool { return self.tagName? == "text" && self.content != nil }
 
     var raw: String? { return self["raw"] as? String }
     
@@ -72,21 +72,17 @@ class NDHppleElement {
     
     var text: String? { return self.firstTextChild?.content }
     
-    var attributes: [String:AnyObject] {
+    var attributes: Dictionary<String, AnyObject> {
     
-        var translatedAttribtues = [String:AnyObject]()
-        if let attributeArray = self[NDHppleNodeKey.AttributeArray.toRaw()] as? Array<Dictionary<String, AnyObject>> {
+        var translatedAttribtues = Dictionary<String, AnyObject>()
+        for attributeDict in self[NDHppleNodeKey.AttributeArray.toRaw()] as Array<Dictionary<String, AnyObject>> {
             
-            for attributeDict in attributeArray {
+            if attributeDict[NDHppleNodeKey.Content.toRaw()] != nil && attributeDict[NDHppleNodeKey.AttributeName.toRaw()] != nil {
             
-                if attributeDict[NDHppleNodeKey.Content.toRaw()] && attributeDict[NDHppleNodeKey.AttributeName.toRaw()]
-                {
-            
-                    let value : AnyObject = attributeDict[NDHppleNodeKey.Content.toRaw()]!
-                    let key : AnyObject = attributeDict[NDHppleNodeKey.AttributeName.toRaw()]!
+                let value : AnyObject = attributeDict[NDHppleNodeKey.Content.toRaw()]!
+                let key : AnyObject = attributeDict[NDHppleNodeKey.AttributeName.toRaw()]!
                 
-                    translatedAttribtues.updateValue(value, forKey: key as String)
-                }
+                translatedAttribtues.updateValue(value, forKey: key as String)
             }
         }
             
