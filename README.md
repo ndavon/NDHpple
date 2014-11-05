@@ -25,7 +25,7 @@ See AppDelegate.swift for a more detailed sample.
 
 <pre>
 let html = NSString(data: data, encoding: NSUTF8StringEncoding)
-let parser = NDHpple(HTMLData: html)
+let parser = NDHpple(HTMLData: html!)
 let result = parser.searchWithXPathQuery(query)!
 
 for node in result {
