@@ -336,7 +336,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = "-lxml2";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "NDHpple/NDHpple-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "NDHpple/NDHpple/NDHpple-Bridging-Header.h";
 			};
 			name = Debug;
 		};
@@ -354,7 +354,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = "-lxml2";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "NDHpple/NDHpple-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "NDHpple/NDHpple/NDHpple-Bridging-Header.h";
 			};
 			name = Release;
 		};

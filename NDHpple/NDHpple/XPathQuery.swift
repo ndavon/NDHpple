@@ -15,25 +15,25 @@ func createNode(currentNode: xmlNodePtr, inout parentDictionary: Dictionary<Stri
     if currentNode.memory.name != nil {
         
         let name = String.fromCString(UnsafePointer<CChar>(currentNode.memory.name))
-        resultForNode.updateValue(name!, forKey: NDHppleNodeKey.Name.toRaw())
+        resultForNode.updateValue(name!, forKey: NDHppleNodeKey.Name.rawValue)
     }
     
     if currentNode.memory.content != nil {
 
         let content = String.fromCString(UnsafePointer<CChar>(currentNode.memory.content))
-        if resultForNode[NDHppleNodeKey.Name.toRaw()] as AnyObject? as? String == "text" {
+        if resultForNode[NDHppleNodeKey.Name.rawValue] as AnyObject? as? String == "text" {
             
             if parentContent {
                 
-                parentDictionary.updateValue(content!, forKey: NDHppleNodeKey.Content.toRaw())
+                parentDictionary.updateValue(content!, forKey: NDHppleNodeKey.Content.rawValue)
                 return nil
             }
             
-            resultForNode.updateValue(content!, forKey: NDHppleNodeKey.Content.toRaw())
+            resultForNode.updateValue(content!, forKey: NDHppleNodeKey.Content.rawValue)
             return resultForNode
         } else {
             
-            resultForNode.updateValue(content!, forKey: NDHppleNodeKey.Content.toRaw())
+            resultForNode.updateValue(content!, forKey: NDHppleNodeKey.Content.rawValue)
         }
     }
     
@@ -48,14 +48,14 @@ func createNode(currentNode: xmlNodePtr, inout parentDictionary: Dictionary<Stri
             let attributeName = attribute.memory.name
             if attributeName != nil {
                 
-                attributeDictionary.updateValue(String.fromCString(UnsafePointer<CChar>(attributeName))!, forKey: NDHppleNodeKey.AttributeName.toRaw())
+                attributeDictionary.updateValue(String.fromCString(UnsafePointer<CChar>(attributeName))!, forKey: NDHppleNodeKey.AttributeName.rawValue)
             }
             
             if attribute.memory.children != nil {
                 
                 if let childDictionary = createNode(attribute.memory.children, &attributeDictionary, true) {
                     
-                    attributeDictionary.updateValue(childDictionary, forKey: NDHppleNodeKey.AttributeContent.toRaw())
+                    attributeDictionary.updateValue(childDictionary, forKey: NDHppleNodeKey.AttributeContent.rawValue)
                 }
             }
             
@@ -69,7 +69,7 @@ func createNode(currentNode: xmlNodePtr, inout parentDictionary: Dictionary<Stri
         
         if attributeArray.count > 0 {
             
-            resultForNode.updateValue(attributeArray, forKey: NDHppleNodeKey.AttributeArray.toRaw())
+            resultForNode.updateValue(attributeArray, forKey: NDHppleNodeKey.AttributeArray.rawValue)
         }
     }
     
@@ -90,7 +90,7 @@ func createNode(currentNode: xmlNodePtr, inout parentDictionary: Dictionary<Stri
         
         if childContentArray.count > 0 {
             
-            resultForNode.updateValue(childContentArray, forKey: NDHppleNodeKey.Children.toRaw())
+            resultForNode.updateValue(childContentArray, forKey: NDHppleNodeKey.Children.rawValue)
         }
     }
     
