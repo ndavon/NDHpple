@@ -39,6 +39,6 @@ class NDHpple {
     
     func peekAtSearchWithXPathQuery(xPathOrCSS: String) -> NDHppleElement? {
         
-        return searchWithXPathQuery(xPathOrCSS)?[0]
+        return searchWithXPathQuery(xPathOrCSS)?.first
     }
 }
