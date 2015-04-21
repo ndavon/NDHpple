@@ -44,7 +44,7 @@ class NDHppleElement {
     
     var hasChildren: Bool { return self[NDHppleNodeKey.Children.rawValue] as? Int != nil }
     
-    var isTextNode: Bool { return self.tagName? == "text" && self.content != nil }
+    var isTextNode: Bool { return self.tagName == "text" && self.content != nil }
 
     var raw: String? { return self["raw"] as? String }
     
@@ -75,14 +75,14 @@ class NDHppleElement {
     var attributes: Dictionary<String, AnyObject> {
     
         var translatedAttribtues = Dictionary<String, AnyObject>()
-        for attributeDict in self[NDHppleNodeKey.AttributeArray.rawValue] as Array<Dictionary<String, AnyObject>> {
+        for attributeDict in self[NDHppleNodeKey.AttributeArray.rawValue] as! Array<Dictionary<String, AnyObject>> {
             
             if attributeDict[NDHppleNodeKey.Content.rawValue] != nil && attributeDict[NDHppleNodeKey.AttributeName.rawValue] != nil {
             
                 let value : AnyObject = attributeDict[NDHppleNodeKey.Content.rawValue]!
                 let key : AnyObject = attributeDict[NDHppleNodeKey.AttributeName.rawValue]!
                 
-                translatedAttribtues.updateValue(value, forKey: key as String)
+                translatedAttribtues.updateValue(value, forKey: key as! String)
             }
         }
             
