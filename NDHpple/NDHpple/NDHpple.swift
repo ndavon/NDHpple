@@ -33,7 +33,7 @@ class NDHpple {
     
     func searchWithXPathQuery(xPathOrCSS: String) -> Array<NDHppleElement>? {
         
-        let nodes = isXML ? PerformXMLXPathQuery(data, xPathOrCSS) : PerformHTMLXPathQuery(data, xPathOrCSS)
+        let nodes = isXML ? PerformXMLXPathQuery(data, query: xPathOrCSS) : PerformHTMLXPathQuery(data, query: xPathOrCSS)
         return nodes?.map{ NDHppleElement(node: $0) }
     }
     
