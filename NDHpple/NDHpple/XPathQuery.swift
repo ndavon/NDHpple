@@ -53,7 +53,7 @@ func createNode(currentNode: xmlNodePtr, inout parentDictionary: Dictionary<Stri
             
             if attribute.memory.children != nil {
                 
-                if let childDictionary = createNode(attribute.memory.children, &attributeDictionary, true) {
+                if let childDictionary = createNode(attribute.memory.children, parentDictionary: &attributeDictionary, parentContent: true) {
                     
                     attributeDictionary.updateValue(childDictionary, forKey: NDHppleNodeKey.AttributeContent.rawValue)
                 }
@@ -80,7 +80,7 @@ func createNode(currentNode: xmlNodePtr, inout parentDictionary: Dictionary<Stri
         
         while childNode != nil {
             
-            if let childDictionary = createNode(childNode, &resultForNode, false) {
+            if let childDictionary = createNode(childNode, parentDictionary: &resultForNode, parentContent: false) {
                 
                 childContentArray.append(childDictionary)
             }
@@ -112,7 +112,7 @@ func PerformXPathQuery(data: NSString, query: String, isXML: Bool) -> Array<Dict
     let encoding = CFStringGetCStringPtr(nil, 0)
     let options: CInt = isXML ? 1 : ((1 << 5) | (1 << 6))
     
-    var function = isXML ? xmlReadMemory : htmlReadMemory
+    let function = isXML ? xmlReadMemory : htmlReadMemory
     let doc = function(bytes, length, url, encoding, options)
 
     if doc != nil {
@@ -120,7 +120,7 @@ func PerformXPathQuery(data: NSString, query: String, isXML: Bool) -> Array<Dict
         let xPathCtx = xmlXPathNewContext(doc)
         if xPathCtx != nil {
 
-            var queryBytes = query.cStringUsingEncoding(NSUTF8StringEncoding)!
+            let queryBytes = query.cStringUsingEncoding(NSUTF8StringEncoding)!
             let ptr = UnsafePointer<CChar>(queryBytes)
 
             let xPathObj = xmlXPathEvalExpression(UnsafePointer<CUnsignedChar>(ptr), xPathCtx)
@@ -134,7 +134,7 @@ func PerformXPathQuery(data: NSString, query: String, isXML: Bool) -> Array<Dict
                     var dummy = Dictionary<String, AnyObject>()
                     for rawNode in nodesArray {
 
-                        if let node = createNode(rawNode, &dummy, false) {
+                        if let node = createNode(rawNode, parentDictionary: &dummy, parentContent: false) {
 
                             resultNodes.append(node)
                         }
@@ -157,10 +157,10 @@ func PerformXPathQuery(data: NSString, query: String, isXML: Bool) -> Array<Dict
 
 func PerformXMLXPathQuery(data: String, query: String) -> Array<Dictionary<String, AnyObject>>? {
 
-    return PerformXPathQuery(data, query, true)
+    return PerformXPathQuery(data, query: query, isXML: true)
 }
 
 func PerformHTMLXPathQuery(data: String, query: String) -> Array<Dictionary<String, AnyObject>>? {
 
-    return PerformXPathQuery(data, query, false)
+    return PerformXPathQuery(data, query: query, isXML: false)
 }
