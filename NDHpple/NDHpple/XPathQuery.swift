@@ -8,159 +8,156 @@
 
 import Foundation
 
-func createNode(currentNode: xmlNodePtr, inout parentDictionary: Dictionary<String, AnyObject>, parentContent: Bool) -> Dictionary<String, AnyObject>? {
+private func createAttributes(attributes: xmlAttrPtr) -> [Node] {
     
-    var resultForNode = Dictionary<String, AnyObject>(minimumCapacity: 8)
+    var attributeArray = [Node]()
     
-    if currentNode.memory.name != nil {
-        
-        let name = String.fromCString(UnsafePointer<CChar>(currentNode.memory.name))
-        resultForNode.updateValue(name!, forKey: NDHppleNodeKey.Name.rawValue)
+    for var attribute = attributes; attribute != nil; attribute = attribute.memory.next {
+            
+        var attributeDictionary = Node()
+            
+        if let attributeName = String.fromCString(UnsafePointer<CChar>(attribute.memory.name)) {
+                
+            attributeDictionary.updateValue(attributeName, forKey: NDHppleNodeKey.AttributeName.rawValue)
+        }
+            
+        if attribute.memory.children != nil,
+           let childDictionary = createNode(attribute.memory.children, parentNode: &attributeDictionary, parentContent: true) {
+            
+                attributeDictionary.updateValue(childDictionary, forKey: NDHppleNodeKey.AttributeContent.rawValue)
+        }
+            
+        if attributeDictionary.count > 0 {
+                
+            attributeArray.append(attributeDictionary)
+        }
     }
-    
-    if currentNode.memory.content != nil {
+        
+    return attributeArray
+}
 
-        let content = String.fromCString(UnsafePointer<CChar>(currentNode.memory.content))
-        if resultForNode[NDHppleNodeKey.Name.rawValue] as AnyObject? as? String == "text" {
+private func createNode(currentNode: xmlNodePtr, inout parentNode: Node, parentContent: Bool) -> Node? {
+    
+    var resultForNode = Node(minimumCapacity: 8)
+    
+    if let name = String.fromCString(UnsafePointer<CChar>(currentNode.memory.name)) {
+        
+        resultForNode.updateValue(name, forKey: NDHppleNodeKey.Name.rawValue)
+    }
+    
+    if let content = String.fromCString(UnsafePointer<CChar>(currentNode.memory.content)) {
+
+        let t = resultForNode[NDHppleNodeKey.Name.rawValue] as? String == "text"
+        switch (t, parentContent) {
             
-            if parentContent {
-                
-                parentDictionary.updateValue(content!, forKey: NDHppleNodeKey.Content.rawValue)
-                return nil
-            }
-            
-            resultForNode.updateValue(content!, forKey: NDHppleNodeKey.Content.rawValue)
+        case (true, true):
+            parentNode.updateValue(content, forKey: NDHppleNodeKey.Content.rawValue)
+            return nil
+        case (true, false):
+            resultForNode.updateValue(content, forKey: NDHppleNodeKey.Content.rawValue)
             return resultForNode
-        } else {
-            
-            resultForNode.updateValue(content!, forKey: NDHppleNodeKey.Content.rawValue)
+        default:
+            resultForNode.updateValue(content, forKey: NDHppleNodeKey.Content.rawValue)
         }
     }
     
-    var attribute = currentNode.memory.properties
-    if attribute != nil {
-        
-        var attributeArray = Array<Dictionary<String, AnyObject>>()
-        
-        while attribute != nil {
-        
-            var attributeDictionary = Dictionary<String, AnyObject>()
-            let attributeName = attribute.memory.name
-            if attributeName != nil {
-                
-                attributeDictionary.updateValue(String.fromCString(UnsafePointer<CChar>(attributeName))!, forKey: NDHppleNodeKey.AttributeName.rawValue)
-            }
+    let attributes = currentNode.memory.properties
+    let attributeArray = createAttributes(attributes)
+    
+    if attributeArray.count > 0 {
             
-            if attribute.memory.children != nil {
-                
-                if let childDictionary = createNode(attribute.memory.children, &attributeDictionary, true) {
-                    
-                    attributeDictionary.updateValue(childDictionary, forKey: NDHppleNodeKey.AttributeContent.rawValue)
-                }
-            }
-            
-            if attributeDictionary.count > 0 {
-                
-                attributeArray.append(attributeDictionary)
-            }
-            
-            attribute = attribute.memory.next
-        }
+        resultForNode.updateValue(attributeArray, forKey: NDHppleNodeKey.AttributeArray.rawValue)
+    }
+    
+    let children = currentNode.memory.children
+    var childArray = [Node]()
+    
+    for var child = children; child != nil; child = child.memory.next {
         
-        if attributeArray.count > 0 {
-            
-            resultForNode.updateValue(attributeArray, forKey: NDHppleNodeKey.AttributeArray.rawValue)
+        if let childDictionary = createNode(child, parentNode: &resultForNode, parentContent: false) {
+            childArray.append(childDictionary)
         }
     }
     
-    var childNode = currentNode.memory.children
-    if childNode != nil {
+    if childArray.count > 0 {
         
-        var childContentArray = Array<Dictionary<String, AnyObject>>()
-        
-        while childNode != nil {
-            
-            if let childDictionary = createNode(childNode, &resultForNode, false) {
-                
-                childContentArray.append(childDictionary)
-            }
-        
-            childNode = childNode.memory.next
-        }
-        
-        if childContentArray.count > 0 {
-            
-            resultForNode.updateValue(childContentArray, forKey: NDHppleNodeKey.Children.rawValue)
-        }
+        resultForNode.updateValue(childArray, forKey: NDHppleNodeKey.Children.rawValue)
     }
     
     let buffer = xmlBufferCreate()
     xmlNodeDump(buffer, currentNode.memory.doc, currentNode, 0, 0)
-    resultForNode.updateValue(String.fromCString(UnsafePointer<CChar>(buffer.memory.content))!, forKey: "raw")
+    if let content = String.fromCString(UnsafePointer<CChar>(buffer.memory.content)) {
+        
+        resultForNode.updateValue(content, forKey: "raw")
+    }
     xmlBufferFree(buffer)
     
     return resultForNode
 }
 
-func PerformXPathQuery(data: NSString, query: String, isXML: Bool) -> Array<Dictionary<String, AnyObject>>? {
+enum QueryError : ErrorType {
     
-    var result: Array<Dictionary<String, AnyObject>>?
+    case Empty
+    case Parse
+    case Create
+}
+
+func PerformXPathQuery(data: NSString, query: String, isXML: Bool) throws -> [Node] {
+    
+    if data.length == 0 {
+        
+        throw QueryError.Empty
+    }
     
     let bytes = data.cStringUsingEncoding(NSUTF8StringEncoding)
     let length = CInt(data.lengthOfBytesUsingEncoding(NSUTF8StringEncoding))
-    let url = ""
     let encoding = CFStringGetCStringPtr(nil, 0)
-    let options: CInt = isXML ? 1 : ((1 << 5) | (1 << 6))
+    // isXML ? XML_PARSE_RECOVER : (HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING)
+    let options: CInt = isXML ? 1 : (1 << 5 | 1 << 6)
     
-    var function = isXML ? xmlReadMemory : htmlReadMemory
-    let doc = function(bytes, length, url, encoding, options)
+    let function = isXML ? xmlReadMemory : htmlReadMemory
+    let doc = function(bytes, length, "", encoding, options)
+    guard doc != nil else { throw QueryError.Parse }
+    defer { xmlFreeDoc(doc) }
+    
+    let xPathCtx = xmlXPathNewContext(doc)
+    guard xPathCtx != nil else { throw QueryError.Parse }
+    defer { xmlXPathFreeContext(xPathCtx) }
+    
+    let queryBytes = query.cStringUsingEncoding(NSUTF8StringEncoding)!
+    let ptr = UnsafePointer<CUnsignedChar>(queryBytes)
 
-    if doc != nil {
-        
-        let xPathCtx = xmlXPathNewContext(doc)
-        if xPathCtx != nil {
+    let xPathObj = xmlXPathEvalExpression(ptr, xPathCtx)
+    guard xPathObj != nil else { throw QueryError.Parse }
+    defer { xmlXPathFreeObject(xPathObj) }
+    
+    let nodes = xPathObj.memory.nodesetval
+    guard nodes != nil else { throw QueryError.Parse }
+    
+    var resultNodes = [Node]()
+    let nodesArray = UnsafeBufferPointer(start: nodes.memory.nodeTab, count: Int(nodes.memory.nodeNr))
+    var dummy = Node()
+    
+    for rawNode in nodesArray {
 
-            var queryBytes = query.cStringUsingEncoding(NSUTF8StringEncoding)!
-            let ptr = UnsafePointer<CChar>(queryBytes)
+        if let node = createNode(rawNode, parentNode: &dummy, parentContent: false) {
 
-            let xPathObj = xmlXPathEvalExpression(UnsafePointer<CUnsignedChar>(ptr), xPathCtx)
-            if xPathObj != nil {
-                
-                let nodes = xPathObj.memory.nodesetval
-                if nodes != nil {
-                    
-                    var resultNodes = Array<Dictionary<String, AnyObject>>()
-                    let nodesArray = UnsafeBufferPointer(start: nodes.memory.nodeTab, count: Int(nodes.memory.nodeNr))
-                    var dummy = Dictionary<String, AnyObject>()
-                    for rawNode in nodesArray {
-
-                        if let node = createNode(rawNode, &dummy, false) {
-
-                            resultNodes.append(node)
-                        }
-                    }
-                    
-                    result = resultNodes
-                }
-                
-                xmlXPathFreeObject(xPathObj)
-            }
+            resultNodes.append(node)
+        } else {
             
-            xmlXPathFreeContext(xPathCtx)
+            throw QueryError.Create
         }
-        
-        xmlFreeDoc(doc)
     }
-    
-    return result
+                    
+    return resultNodes
 }
 
-func PerformXMLXPathQuery(data: String, query: String) -> Array<Dictionary<String, AnyObject>>? {
+func PerformXMLXPathQuery(data: String, query: String) throws -> [Node] {
 
-    return PerformXPathQuery(data, query, true)
+    return try PerformXPathQuery(data, query: query, isXML: true)
 }
 
-func PerformHTMLXPathQuery(data: String, query: String) -> Array<Dictionary<String, AnyObject>>? {
+func PerformHTMLXPathQuery(data: String, query: String) throws -> [Node] {
 
-    return PerformXPathQuery(data, query, false)
+    return try PerformXPathQuery(data, query: query, isXML: false)
 }

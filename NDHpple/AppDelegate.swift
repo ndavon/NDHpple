@@ -15,32 +15,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func showNDHpple() {
         
-        NSURLSession.sharedSession().dataTaskWithURL(NSURL(string: "http://www.reddit.com/r/swift")!) { data, response, error in
+        NSURLSession.sharedSession().dataTaskWithURL(NSURL(string: "https://www.reddit.com/r/swift")!) { data, response, error in
             
-            let html = NSString(data: data, encoding: NSUTF8StringEncoding)
-            let parser = NDHpple(HTMLData: html!)
+            let html = NSString(data: data!, encoding: NSUTF8StringEncoding)
+            let parser = NDHpple(HTMLData: html! as String)
             
-            let old_xpath = "/html/body/div[3]/div[2]/div/div[2]/p[@class='title']/a"
             let xpath = "//*[@id='siteTable']/div/div[2]/p[@class='title']/a"
             
-            let titles = parser.searchWithXPathQuery(xpath)!
+            guard let titles = parser.searchWithXPathQuery(xpath) else { return }
             
             for node in titles {
                 
-                println(node.firstChild?.content?)
+                print(node.firstChild?.content!)
             }
         }.resume()
     }
 
-    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: NSDictionary?) -> Bool {
+    func applicationDidFinishLaunching(application: UIApplication) {
+        
         self.window = UIWindow(frame: UIScreen.mainScreen().bounds)
         // Override point for customization after application launch.
         self.window!.backgroundColor = UIColor.whiteColor()
         self.window!.makeKeyAndVisible()
-
-        showNDHpple()
+        self.window!.rootViewController = UIViewController()
         
-        return true
+        showNDHpple()
     }
 
     func applicationWillResignActive(application: UIApplication) {

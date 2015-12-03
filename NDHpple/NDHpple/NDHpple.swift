@@ -9,6 +9,10 @@
 import Foundation
 import UIKit
 
+enum NDHppleError : ErrorType {
+    
+    case Empty
+}
 
 class NDHpple {
     
@@ -30,15 +34,23 @@ class NDHpple {
         
         self.init(data: HTMLData, isXML: false)
     }
-    
-    func searchWithXPathQuery(xPathOrCSS: String) -> Array<NDHppleElement>? {
+
+    func searchWithXPathQuery(query: String) -> [NDHppleElement]? {
         
-        let nodes = isXML ? PerformXMLXPathQuery(data, xPathOrCSS) : PerformHTMLXPathQuery(data, xPathOrCSS)
-        return nodes?.map{ NDHppleElement(node: $0) }
+        do {
+
+            let function = isXML ? PerformXMLXPathQuery : PerformHTMLXPathQuery
+            let nodes = try function(data, query: query)
+            return nodes.map{ NDHppleElement(node: $0) }
+        } catch _ {
+            
+            return nil
+        }
     }
     
-    func peekAtSearchWithXPathQuery(xPathOrCSS: String) -> NDHppleElement? {
+    func peekAtSearchWithXPathQuery(query: String) throws -> NDHppleElement {
         
-        return searchWithXPathQuery(xPathOrCSS)?[0]
+        guard let results = searchWithXPathQuery(query) else { throw NDHppleError.Empty }
+        return results[0]
     }
 }
