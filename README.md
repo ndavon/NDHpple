@@ -24,9 +24,9 @@ NDHpple was created by Nicolai Davidsson, based on [Hpple](http://github.com/top
 See AppDelegate.swift for a more detailed sample.
 
 <pre>
-let html = NSString(data: data, encoding: NSUTF8StringEncoding)
-let parser = NDHpple(HTMLData: html!)
-let result = parser.searchWithXPathQuery(query)!
+let html = NSString(data: data!, encoding: NSUTF8StringEncoding)
+let parser = NDHpple(HTMLData: html! as String)
+guard let result = parser.searchWithXPathQuery(query) else { return }
 
 for node in result {
                 
