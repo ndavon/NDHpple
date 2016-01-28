@@ -7,14 +7,48 @@
 //
 
 import Foundation
-import Clibxml2 
+import Clibxml2
+
+private class XmlList<T> : SequenceType {
+    
+    typealias Element = UnsafeMutablePointer<T>
+    var current: Element
+    var next: Element { return nil }
+
+    init(head: Element) { self.current = head }
+
+    func generate() -> AnyGenerator<Element> {
+        
+        return AnyGenerator(body: {
+            
+            guard self.current != nil else { return nil }
+            
+            let c = self.current
+            self.current = self.next
+            
+            return c
+        })
+    }
+}
+
+private class XmlAttrList : XmlList<xmlAttr> {
+
+    override var next: Element { return current.memory.next }
+    override init(head: Element) { super.init(head: head) }
+}
+
+private class XmlNodeList : XmlList<xmlNode> {
+
+    override var next: Element { return current.memory.next }
+    override init(head: Element) { super.init(head: head) }
+}
 
 private func createAttributes(attributes: xmlAttrPtr) -> [Node] {
     
     var attributeArray = [Node]()
     
-    for var attribute = attributes; attribute != nil; attribute = attribute.memory.next {
-            
+    for attribute in XmlAttrList(head: attributes) {
+        
         var attributeDictionary = Node()
             
         if let attributeName = String.fromCString(UnsafePointer<CChar>(attribute.memory.name)) {
@@ -28,7 +62,7 @@ private func createAttributes(attributes: xmlAttrPtr) -> [Node] {
                 attributeDictionary.updateValue(childDictionary, forKey: NDHppleNodeKey.AttributeContent.rawValue)
         }
             
-        if attributeDictionary.count > 0 {
+        if !attributeDictionary.isEmpty {
                 
             attributeArray.append(attributeDictionary)
         }
@@ -65,20 +99,13 @@ private func createNode(currentNode: xmlNodePtr, inout parentNode: Node, parentC
     let attributes = currentNode.memory.properties
     let attributeArray = createAttributes(attributes)
     
-    if attributeArray.count > 0 {
+    if !attributeArray.isEmpty {
             
         resultForNode.updateValue(attributeArray, forKey: NDHppleNodeKey.AttributeArray.rawValue)
     }
     
     let children = currentNode.memory.children
-    var childArray = [Node]()
-    
-    for var child = children; child != nil; child = child.memory.next {
-        
-        if let childDictionary = createNode(child, parentNode: &resultForNode, parentContent: false) {
-            childArray.append(childDictionary)
-        }
-    }
+    let childArray = XmlNodeList(head: children).flatMap { createNode($0, parentNode: &resultForNode, parentContent: false) }
     
     if childArray.count > 0 {
         
@@ -91,7 +118,7 @@ private func createNode(currentNode: xmlNodePtr, inout parentNode: Node, parentC
         
         resultForNode.updateValue(content, forKey: "raw")
     }
-    xmlBufferFree(buffer)
+    defer { xmlBufferFree(buffer) }
     
     return resultForNode
 }
