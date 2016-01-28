@@ -8,33 +8,34 @@ NDHpple was created by Nicolai Davidsson, based on [Hpple](http://github.com/top
 
 # INSTALLATION
 
-* Drag the NDHpple files to your project
-* add the following lines to your project's Bridging Header:
+Build the package with the most recent Swift 2.2 Snapshot (as of January 28th) with this command:
 
 <pre>
-#import &lt;libxml/tree.h>
-#import &lt;libxml/parser.h>
-#import &lt;libxml/HTMLparser.h>
-#import &lt;libxml/xpath.h>
-#import &lt;libxml/xpathInternals.h>
+swift build -Xcc -I/usr/include/libxml2 -c release
 </pre>
+
+This will build NDHpple as module. You can also pass this URL (http://github.com/ndavon/NDHpple) as dependency in another package but you'll still have to pass the include path as compiler flag.
 
 # USAGE
 
-See AppDelegate.swift for a more detailed sample.
+See [Example/main.swift](http://github.com/ndavon/NDHpple/tree/master/Sources/Example/main.swift) for a more detailed sample.
 
 <pre>
-let html = NSString(data: data!, encoding: NSUTF8StringEncoding)
-let parser = NDHpple(HTMLData: html! as String)
-guard let result = parser.searchWithXPathQuery(query) else { return }
+import NDHpple
+
+let html = try! String(contentsOfURL: NSURL(string: url)!)
+let parser = NDHpple(HTMLData: html)
+
+let result = parser.searchWithXPathQuery(query)
 
 for node in result {
-                
-    println(node)
+
+    print(node)
 }
 </pre>
 
+Please note that some slight modifications were made that will probably break your existing implementation. 
+
 # TODO
 
-* fix hacky code with further Swift versions
-* more error catching
+* replace C-style for loop in XPathQuery.swift with a SequenceType object
