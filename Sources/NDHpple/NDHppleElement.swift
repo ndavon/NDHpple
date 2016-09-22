@@ -8,14 +8,13 @@
 
 import Foundation
 
-enum NDHppleNodeKey: String {
-
-    case Content            = "nodeContent"
-    case Name               = "nodeName"
-    case Children           = "nodeChildArray"
-    case AttributeArray     = "nodeAttributeArray"
-    case AttributeContent   = "attributeContent"
-    case AttributeName      = "attributeName"
+struct NDHppleNodeKey {
+    static let Content            = "nodeContent"
+    static let Name               = "nodeName"
+    static let Children           = "nodeChildArray"
+    static let AttributeArray     = "nodeAttributeArray"
+    static let AttributeContent   = "attributeContent"
+    static let AttributeName      = "attributeName"
 }
 
 typealias Node = [String:AnyObject]
@@ -43,16 +42,16 @@ public class NDHppleElement {
 
     public var description: String { return self.node.description }
     public var raw: String? { return self["raw"] as? String }
-    public var content: String? { return self[NDHppleNodeKey.Content.rawValue] as? String }
-    public var tagName: String? { return self[NDHppleNodeKey.Name.rawValue] as? String }
+    public var content: String? { return self[NDHppleNodeKey.Content] as? String }
+    public var tagName: String? { return self[NDHppleNodeKey.Name] as? String }
     
     public var attributes: [String:AnyObject] {
     
         var translatedAttribtues = [String:AnyObject]()
-        for attributeDict in self[NDHppleNodeKey.AttributeArray.rawValue] as! [[String:AnyObject]] {
+        for attributeDict in self[NDHppleNodeKey.AttributeArray] as! [[String:AnyObject]] {
             
-            if  let value = attributeDict[NDHppleNodeKey.Content.rawValue],
-                let key = attributeDict[NDHppleNodeKey.AttributeName.rawValue] as? String {
+            if  let value = attributeDict[NDHppleNodeKey.Content],
+                let key = attributeDict[NDHppleNodeKey.AttributeName] as? String {
                     
                 translatedAttribtues.updateValue(value, forKey: key)
             }
@@ -64,32 +63,32 @@ public class NDHppleElement {
 
 extension NDHppleElement {
     
-    public var hasChildren: Bool { return self[NDHppleNodeKey.Children.rawValue] != nil }
+    public var hasChildren: Bool { return self[NDHppleNodeKey.Children] != nil }
 
     public var children: [NDHppleElement]? {
         
-        let children = self[NDHppleNodeKey.Children.rawValue] as? [Node]
+        let children = self[NDHppleNodeKey.Children] as? [Node]
         return children?.map{ NDHppleElement(node: $0, parent: self) }
     }
     
     public var firstChild: NDHppleElement? { return self.children?[0] }
     
-    public func childrenWithTagName(tagName: String) -> [NDHppleElement]? {
+    public func childrenWithTagName(_ tagName: String) -> [NDHppleElement]? {
         
         return self.children?.filter{ $0.tagName == tagName }
     }
     
-    public func firstChildWithTagName(tagName: String) -> NDHppleElement? {
+    public func firstChildWithTagName(_ tagName: String) -> NDHppleElement? {
         
         return self.childrenWithTagName(tagName)?[0]
     }
     
-    public func childrenWithClassName(className: String) -> [NDHppleElement]? {
+    public func childrenWithClassName(_ className: String) -> [NDHppleElement]? {
         
         return self.children?.filter{ $0["class"] as? String == className }
     }
     
-    public func firstChildWithClassName(className: String) -> NDHppleElement? {
+    public func firstChildWithClassName(_ className: String) -> NDHppleElement? {
         
         return self.childrenWithClassName(className)?[0]
     }

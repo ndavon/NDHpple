@@ -8,11 +8,6 @@
 
 import Foundation
 
-public enum NDHppleError : ErrorType {
-    
-    case Empty
-}
-
 public class NDHpple {
     
     private let data: String
@@ -35,18 +30,16 @@ public class NDHpple {
     }
 
     public func searchWithXPathQuery(query: String) -> [NDHppleElement] {
-        
 
         let function = isXML ? PerformXMLXPathQuery : PerformHTMLXPathQuery
-        let nodes = try? function(data, query: query)
-            
+        let nodes = try? function(data, query)
+
         return nodes?.map{ NDHppleElement(node: $0) } ?? []
     }
     
-    public func peekAtSearchWithXPathQuery(query: String) throws -> NDHppleElement {
+    public func peekAtSearchWithXPathQuery(query: String) -> NDHppleElement? {
        
-        guard case let results = searchWithXPathQuery(query) where !results.isEmpty else { throw NDHppleError.Empty }
-        
-        return results[0]
+        let results = searchWithXPathQuery(query: query)
+        return results.first
     }
 }
