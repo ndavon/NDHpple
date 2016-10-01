@@ -1,4 +1,3 @@
-
 import NDHpple
 import Foundation
 
@@ -10,8 +9,8 @@ guard let html = try? String(contentsOf: URL(string: url)!) else {
 
 let parser = NDHpple(HTMLData: html)
 let xpath = "//*[@id='siteTable']/div/div[2]/p[@class='title']/a"
-let titleNodes = parser.searchWithXPathQuery(query: xpath)
+let titleNodes = parser.search(withQuery: xpath)
 
-titleNodes.forEach {
-    print($0.firstChild?.content)
+titleNodes.flatMap { $0.text }.forEach { 
+    print($0)
 }

@@ -43,83 +43,65 @@ private class XmlNodeList : XmlList<xmlNode> {
     override init(head: Element) { super.init(head: head) }
 }
 
-private func createAttributes(attributes: xmlAttrPtr) -> [Node] {
+private func createAttributes(attributes: xmlAttrPtr) -> Attributes {
     
-    var attributeArray = [Node]()
-    
+    var attributeDictionary = Attributes()
+
     for attribute in XmlAttrList(head: attributes) {
-        
-        var attributeDictionary = Node()
-            
-        let attributeName = String(cString: attribute.pointee.name)
                 
-        attributeDictionary.updateValue(attributeName as AnyObject, forKey: NDHppleNodeKey.AttributeName)
+        // Logically, can an attribute have more than one child (which is a text node)?
+        if let children = attribute.pointee.children,
+           let name = attribute.pointee.name {
             
-        if attribute.pointee.children != nil,
-           let childDictionary = createNode(currentNode: attribute.pointee.children, parentNode: &attributeDictionary, parentContent: true) {
-            
-                attributeDictionary.updateValue(childDictionary as AnyObject, forKey: NDHppleNodeKey.AttributeContent)
-        }
-            
-        if !attributeDictionary.isEmpty {
-                
-            attributeArray.append(attributeDictionary)
+            print(String(cString: name))
+            let childNode = createNode(from: children) 
+            print(String(cString: name))
+            print(childNode)
+            attributeDictionary[String(cString: name)] = childNode
         }
     }
         
-    return attributeArray
+    return attributeDictionary
 }
 
-private func createNode(currentNode: xmlNodePtr!, parentNode: inout Node, parentContent: Bool) -> Node? {
+private func createNode(from currentNode: xmlNodePtr!) -> Node {
     
-    var resultForNode = Node(minimumCapacity: 8)
+    var node = Node(minimumCapacity: 8)
 
-    let name = String(cString: currentNode.pointee.name)
-    resultForNode.updateValue(name as AnyObject, forKey: NDHppleNodeKey.Name)
+    if let name = currentNode.pointee.name {
+        node[NDHppleNodeKey.Name] = String(cString: name) as AnyObject
+    }
+
+    if let content = currentNode.pointee.content {
+        node[NDHppleNodeKey.Content] = String(cString: content) as AnyObject
+    }
     
-    if currentNode.pointee.content != nil {
+    if let attributes = currentNode.pointee.properties {
+        let attributeArray = createAttributes(attributes: attributes)
         
-        let content = String(cString: currentNode.pointee.content)
-        let isText = resultForNode[NDHppleNodeKey.Name] as? String == "text"
-
-        switch (isText, parentContent) {        
-        case (true, true):
-            parentNode.updateValue(content as AnyObject, forKey: NDHppleNodeKey.Content)
-            return nil
-        case (true, false):
-            resultForNode.updateValue(content as AnyObject, forKey: NDHppleNodeKey.Content)
-            return resultForNode
-        default:
-            resultForNode.updateValue(content as AnyObject, forKey: NDHppleNodeKey.Content)
-            break
+        if !attributeArray.isEmpty {
+            node[NDHppleNodeKey.Attributes] = attributeArray as AnyObject
         }
     }
     
-    let attributes = currentNode.pointee.properties!
-    let attributeArray = createAttributes(attributes: attributes)
-    
-    if !attributeArray.isEmpty {
-            
-        resultForNode.updateValue(attributeArray as AnyObject, forKey: NDHppleNodeKey.AttributeArray)
-    }
-    
-    let children = currentNode.pointee.children
-    let childArray = XmlNodeList(head: children).flatMap { createNode(currentNode: $0, parentNode: &resultForNode, parentContent: false) }
-    
-    if !childArray.isEmpty {
-        
-        resultForNode.updateValue(childArray as AnyObject, forKey: NDHppleNodeKey.Children)
-    }
-    
-    let buffer = xmlBufferCreate()
-    xmlNodeDump(buffer, currentNode.pointee.doc, currentNode, 0, 0)
-    
-    let rawContent = String(cString: buffer!.pointee.content)
-    resultForNode.updateValue(rawContent as AnyObject, forKey: "raw")
-    
-    defer { xmlBufferFree(buffer) }
+    if let children = currentNode.pointee.children {
+        let childArray = XmlNodeList(head: children).map(createNode)
 
-    return resultForNode
+        if !childArray.isEmpty {
+            node[NDHppleNodeKey.Children] = childArray as AnyObject
+        }
+    }
+    
+    if let buffer = xmlBufferCreate() {
+        xmlNodeDump(buffer, currentNode.pointee.doc, currentNode, 0, 0)
+    
+        let rawContent = String(cString: buffer.pointee.content)
+        node[NDHppleNodeKey.Raw] = rawContent as AnyObject 
+    
+        defer { xmlBufferFree(buffer) }
+    }
+
+    return node
 }
 
 enum QueryError : Error {
@@ -131,10 +113,7 @@ enum QueryError : Error {
 
 func PerformXPathQuery(data: String, query: String, isXML: Bool) throws -> [Node] {
     
-    if data.isEmpty {
-        
-        throw QueryError.Empty
-    }
+    guard !data.isEmpty else { throw QueryError.Empty }
     
     let bytes = data.cString(using: .utf8)
     let length = CInt(data.lengthOfBytes(using: .utf8))
@@ -156,22 +135,8 @@ func PerformXPathQuery(data: String, query: String, isXML: Bool) throws -> [Node
     
     guard let nodes = xPathObj.pointee.nodesetval else { throw QueryError.Parse }
     
-    var resultNodes = [Node]()
     let nodesArray = UnsafeBufferPointer(start: nodes.pointee.nodeTab, count: Int(nodes.pointee.nodeNr))
-    var dummy = Node()
-
-    for rawNode in nodesArray {
-
-        if let node = createNode(currentNode: rawNode, parentNode: &dummy, parentContent: false) {
-
-            resultNodes.append(node)
-        } else {
-            
-            throw QueryError.Create
-        }
-    }
-
-    return resultNodes
+    return nodesArray.flatMap { createNode(from: $0!) }
 }
 
 func PerformXMLXPathQuery(data: String, query: String) throws -> [Node] {

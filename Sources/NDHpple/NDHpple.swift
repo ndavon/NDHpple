@@ -29,7 +29,7 @@ public class NDHpple {
         self.init(data: HTMLData, isXML: false)
     }
 
-    public func searchWithXPathQuery(query: String) -> [NDHppleElement] {
+    public func search(withQuery query: String) -> [NDHppleElement] {
 
         let function = isXML ? PerformXMLXPathQuery : PerformHTMLXPathQuery
         let nodes = try? function(data, query)
@@ -37,9 +37,9 @@ public class NDHpple {
         return nodes?.map{ NDHppleElement(node: $0) } ?? []
     }
     
-    public func peekAtSearchWithXPathQuery(query: String) -> NDHppleElement? {
+    public func peekAtSearch(withQuery query: String) -> NDHppleElement? {
        
-        let results = searchWithXPathQuery(query: query)
+        let results = search(withQuery: query)
         return results.first
     }
 }
