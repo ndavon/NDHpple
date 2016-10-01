@@ -23,19 +23,15 @@ See [Example/main.swift](http://github.com/ndavon/NDHpple/tree/master/Sources/Ex
 <pre>
 import NDHpple
 
-let html = try! String(contentsOfURL: NSURL(string: url)!)
+let html = try! String(contentsOf: URL(string: url)!) 
+
 let parser = NDHpple(HTMLData: html)
+let result = parser.search(withQuery: query)
 
-let result = parser.searchWithXPathQuery(query)
-
-for node in result {
-
-    print(node)
+result.flatMap { $0.text }.forEach { 
+        print($0)
 }
 </pre>
 
 Please note that some slight modifications were made that will probably break your existing implementation. 
 
-# TODO
-
-* replace C-style for loop in XPathQuery.swift with a SequenceType object
