@@ -17,7 +17,7 @@ private class XmlList<T> : Sequence {
 
     init(head: Element) { self.current = head }
 
-    func makeIterator() -> AnyIterator<UnsafeMutablePointer<T>> {
+    func makeIterator() -> AnyIterator<UnsafeMutablePointer<T>?> {
         
         return AnyIterator {
             
@@ -50,8 +50,8 @@ private func createAttributes(attributes: xmlAttrPtr) -> Attributes {
     for attribute in XmlAttrList(head: attributes) {
                 
         // Logically, can an attribute have more than one child (which is a text node)?
-        if let children = attribute.pointee.children,
-           let name = attribute.pointee.name {
+        if let children = attribute?.pointee.children,
+           let name = attribute?.pointee.name {
             
             print(String(cString: name))
             let childNode = createNode(from: children) 
