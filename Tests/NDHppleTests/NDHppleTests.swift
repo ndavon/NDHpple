@@ -64,6 +64,10 @@ final class NDHppleTests: XCTestCase {
                     <title lang="en">Learning XML</title>
                     <price>39.95</price>
                 </book>
+                <book class="myclass">
+                    <title lang="en">Learning MVC in 2020</title>
+                    <price>5.25</price>
+                </book>
             </bookstore>
             """
 
@@ -89,6 +93,11 @@ final class NDHppleTests: XCTestCase {
         let costyBookTitleNodes = parser.search(withQuery: "/bookstore/book[price>35.00]/title")
         XCTAssertEqual(costyBookTitleNodes.count, 1)
         XCTAssertEqual(costyBookTitleNodes[0].text, "Learning XML")
+
+        // Instead of getting a list of nodes we can get the first element directly
+        let costyBookTitleNode = parser.peekAtSearch(withQuery: "/bookstore/book[price>35.00]/title")
+        XCTAssertNotNil(costyBookTitleNode)
+        XCTAssertEqual(costyBookTitleNode?.text, "Learning XML")
     }
 
     static var allTests = [

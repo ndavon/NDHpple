@@ -49,22 +49,26 @@ extension NDHppleElement {
     
     public var hasChildren: Bool { return !children.isEmpty }
     public var firstChild: NDHppleElement? { return children.first }
-    
+
+    /// Get all children by tag name
     public func children(forName name: String) -> [NDHppleElement] {
         
         return children.filter{ $0.name == name }
     }
-    
+
+    /// Get first child by tag name
     public func firstChild(forName name: String) -> NDHppleElement? {
 
         return children.first { return $0.name == name }
     }
-    
+
+    // TODO: Write documentation
     public func children(forClass class: String) -> [NDHppleElement] {
         
         return children.filter{ $0.attributes["class"]?[NDHppleNodeKey.Name] as? String == `class` }
     }
-    
+
+    // TODO: Write documentation
     public func firstChild(forClass class: String) -> NDHppleElement? {
 
         return children.first { return $0.attributes["class"]?[NDHppleNodeKey.Name] as? String == `class` }
@@ -77,3 +81,11 @@ extension NDHppleElement {
     public var firstTextChild: NDHppleElement? { return firstChild(forName: "text") }
     public var text: String? { return firstTextChild?.content }
 }
+
+#if DEBUG
+extension NDHppleElement: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        return "<NDHppleElement node: \(node.description), attributes: \(attributes.description), children: \(children.count)>"
+    }
+}
+#endif

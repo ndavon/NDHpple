@@ -100,14 +100,14 @@ private func createNode(from currentNode: xmlNodePtr!) -> Node {
 
 enum QueryError : Error {
     
-    case Empty
-    case Parse
-    case Create
+    case empty
+    case parse
+    case create
 }
 
 func PerformXPathQuery(data: String, query: String, isXML: Bool) throws -> [Node] {
     
-    guard !data.isEmpty else { throw QueryError.Empty }
+    guard !data.isEmpty else { throw QueryError.empty }
     
     let bytes = data.cString(using: .utf8)
     let length = CInt(data.lengthOfBytes(using: .utf8))
@@ -116,30 +116,21 @@ func PerformXPathQuery(data: String, query: String, isXML: Bool) throws -> [Node
     let options: CInt = isXML ? 1 : (1 << 5 | 1 << 6)
     let function = isXML ? xmlReadMemory : htmlReadMemory
     
-    guard let doc = function(bytes, length, "", encoding, options) else { throw QueryError.Parse }
+    guard let doc = function(bytes, length, "", encoding, options) else { throw QueryError.parse }
     defer { xmlFreeDoc(doc) }
     
-    guard let xPathCtx = xmlXPathNewContext(doc) else { throw QueryError.Parse }
+    guard let xPathCtx = xmlXPathNewContext(doc) else { throw QueryError.parse }
     defer { xmlXPathFreeContext(xPathCtx) }
     
     let queryBytes = query.utf8CString.map { xmlChar($0) }
 
-    guard let xPathObj = xmlXPathEvalExpression(queryBytes, xPathCtx) else { throw QueryError.Parse }
+    guard let xPathObj = xmlXPathEvalExpression(queryBytes, xPathCtx) else { throw QueryError.parse }
     defer { xmlXPathFreeObject(xPathObj) }
     
-    guard let nodes = xPathObj.pointee.nodesetval else { throw QueryError.Parse }
+    guard let nodes = xPathObj.pointee.nodesetval else { throw QueryError.parse }
     
     let nodesArray = UnsafeBufferPointer(start: nodes.pointee.nodeTab, count: Int(nodes.pointee.nodeNr))
     //return nodesArray.flatMap { createNode(from: $0!) }
     return nodesArray.compactMap { return $0 == nil ? nil : createNode(from: $0!) }
 }
 
-func PerformXMLXPathQuery(data: String, query: String) throws -> [Node] {
-
-    return try PerformXPathQuery(data: data, query: query, isXML: true)
-}
-
-func PerformHTMLXPathQuery(data: String, query: String) throws -> [Node] {
-
-    return try PerformXPathQuery(data: data, query: query, isXML: false)
-}
