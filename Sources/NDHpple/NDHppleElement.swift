@@ -47,33 +47,33 @@ extension NDHppleElement {
 
 extension NDHppleElement {
     
-    public var hasChildren: Bool { return !self.children.isEmpty }
-    public var firstChild: NDHppleElement? { return self.children.first }
+    public var hasChildren: Bool { return !children.isEmpty }
+    public var firstChild: NDHppleElement? { return children.first }
     
     public func children(forName name: String) -> [NDHppleElement] {
         
-        return self.children.filter{ $0.name == name }
+        return children.filter{ $0.name == name }
     }
     
     public func firstChild(forName name: String) -> NDHppleElement? {
-        
-        return self.children(forName: name).first
+
+        return children.first { return $0.name == name }
     }
     
     public func children(forClass class: String) -> [NDHppleElement] {
         
-        return self.children.filter{ $0.attributes["class"]?[NDHppleNodeKey.Name] as? String == `class` }
+        return children.filter{ $0.attributes["class"]?[NDHppleNodeKey.Name] as? String == `class` }
     }
     
     public func firstChild(forClass class: String) -> NDHppleElement? {
-        
-        return self.children(forClass: `class`).first
+
+        return children.first { return $0.attributes["class"]?[NDHppleNodeKey.Name] as? String == `class` }
     }
 }
 
 extension NDHppleElement {
     
-    public var isText: Bool { return self.name == "text" && self.content != nil }
-    public var firstTextChild: NDHppleElement? { return self.firstChild(forName: "text") }
-    public var text: String? { return self.firstTextChild?.content }
+    public var isText: Bool { return name == "text" && content != nil }
+    public var firstTextChild: NDHppleElement? { return firstChild(forName: "text") }
+    public var text: String? { return firstTextChild?.content }
 }

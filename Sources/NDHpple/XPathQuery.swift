@@ -7,40 +7,34 @@
 //
 
 import Foundation
-import Clibxml2
+import libxml2
 
-private class XmlList<T> : Sequence {
-    
-    typealias Element = UnsafeMutablePointer<T>?
-    var current: Element
-    var next: Element { return nil }
+private class XmlList<T> : Sequence, IteratorProtocol {
 
-    init(head: Element) { self.current = head }
+    typealias Element = UnsafeMutablePointer<T>
 
-    func makeIterator() -> AnyIterator<UnsafeMutablePointer<T>> {
-        
-        return AnyIterator {
-            
-            guard self.current != nil else { return nil }
-            
-            let c = self.current!
-            self.current = self.next
-            
-            return c
-        }
+    func nextOfCurrent() -> Element? { return nil }
+
+    var current: Element?
+
+    func next() -> Element? {
+        guard current != nil else { return nil }
+        let c = current!
+        current = nextOfCurrent()
+        return c
+    }
+
+    init(head: Element?) {
+        current = head
     }
 }
 
 private class XmlAttrList : XmlList<xmlAttr> {
-
-    override var next: Element { return current?.pointee.next }
-    override init(head: Element) { super.init(head: head) }
+    override func nextOfCurrent() -> Element? { return current?.pointee.next }
 }
 
 private class XmlNodeList : XmlList<xmlNode> {
-
-    override var next: Element { return current?.pointee.next }
-    override init(head: Element) { super.init(head: head) }
+    override func nextOfCurrent() -> Element? { return current?.pointee.next }
 }
 
 private func createAttributes(attributes: xmlAttrPtr) -> Attributes {
@@ -98,7 +92,7 @@ private func createNode(from currentNode: xmlNodePtr!) -> Node {
         let rawContent = String(cString: buffer.pointee.content)
         node[NDHppleNodeKey.Raw] = rawContent as AnyObject 
     
-        defer { xmlBufferFree(buffer) }
+        do { xmlBufferFree(buffer) }
     }
 
     return node
@@ -136,7 +130,8 @@ func PerformXPathQuery(data: String, query: String, isXML: Bool) throws -> [Node
     guard let nodes = xPathObj.pointee.nodesetval else { throw QueryError.Parse }
     
     let nodesArray = UnsafeBufferPointer(start: nodes.pointee.nodeTab, count: Int(nodes.pointee.nodeNr))
-    return nodesArray.flatMap { createNode(from: $0!) }
+    //return nodesArray.flatMap { createNode(from: $0!) }
+    return nodesArray.compactMap { return $0 == nil ? nil : createNode(from: $0!) }
 }
 
 func PerformXMLXPathQuery(data: String, query: String) throws -> [Node] {
