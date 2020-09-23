@@ -4,6 +4,11 @@ import PackageDescription
 
 let package = Package(
     name: "NDHpple",
+    products: [
+        .library(
+            name: "NDHpple",
+            targets: ["NDHpple"]),
+    ],
     targets: [
         .target(
             name: "NDHpple"),
