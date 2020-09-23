@@ -47,10 +47,10 @@ private func createAttributes(attributes: xmlAttrPtr) -> Attributes {
         if let children = attribute.pointee.children,
            let name = attribute.pointee.name {
             
-            print(String(cString: name))
+            //print(String(cString: name))
             let childNode = createNode(from: children) 
-            print(String(cString: name))
-            print(childNode)
+            //print(String(cString: name))
+            //print(childNode)
             attributeDictionary[String(cString: name)] = childNode
         }
     }

@@ -100,8 +100,15 @@ final class NDHppleTests: XCTestCase {
         XCTAssertEqual(costyBookTitleNode?.text, "Learning XML")
     }
 
+    func testWrongQuery() throws {
+        let parser = NDHpple(XMLData: "")
+        let nodes = parser.search(withQuery: "/root")
+        XCTAssertEqual(nodes.count, 0)
+    }
+
     static var allTests = [
         ("testBasicHtml", testBasicHtml),
-        ("testBasicXml", testBasicXml)
+        ("testBasicXml", testBasicXml),
+        ("testWrongQuery", testWrongQuery),
     ]
 }
