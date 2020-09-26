@@ -8,30 +8,31 @@ NDHpple was created by Nicolai Davidsson, based on [Hpple](http://github.com/top
 
 # INSTALLATION
 
-Build the package with the most recent Swift 2.2 Snapshot (as of January 28th) with this command:
-
-<pre>
-swift build -Xcc -I/usr/include/libxml2 -c release
-</pre>
-
-This will build NDHpple as module. You can also pass this URL (http://github.com/ndavon/NDHpple) as dependency in another package but you'll still have to pass the include path as compiler flag.
+Use swift package manager with url of this repository and then select a version. Old swift versions used to require to link libxml library but this problem has been fixed. No extra steps required.
 
 # USAGE
 
-See [Example/main.swift](http://github.com/ndavon/NDHpple/tree/master/Sources/Example/main.swift) for a more detailed sample.
+See [Tests/NDHppleTests/NDHppleTests.swift](http://github.com/nacho4d/NDHpple/tree/master/Tests/NDHppleTests/NDHppleTests.swift) for more detailed samples.
 
-<pre>
+```
 import NDHpple
 
-let html = try! String(contentsOf: URL(string: url)!) 
-
+// read xml into a string
+let html = """
+    <!DOCTYPE html>
+    <html>
+        <body>
+            <p>My first paragraph.</p>
+            <p>My last paragraph.</p>
+        </body>
+    </html>
+    """
+// initialize parser
 let parser = NDHpple(HTMLData: html)
-let result = parser.search(withQuery: query)
 
+let htmlNodes = parser.search(withQuery: "//p[1]")
+let pNodes = parser.search(withQuery: "//p")
 result.flatMap { $0.text }.forEach { 
         print($0)
 }
-</pre>
-
-Please note that some slight modifications were made that will probably break your existing implementation. 
-
+```
