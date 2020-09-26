@@ -2,6 +2,8 @@
 
 NDHpple is a simplie Swift wrapper on the XMLPathQuery library based on [Hpple](http://github.com/topfunky/hpple).
 
+[![Actions Status](https://github.com/nacho4d/NDHpple/workflows/Swift/badge.svg)](https://github.com/nacho4d/NDHpple/actions)
+
 # CREDITS
 
 NDHpple was created by Nicolai Davidsson, based on [Hpple](http://github.com/topfunky/hpple) by Geoffrey Grosenbach, [Topfunky Corporation](http://topfunky.com).
