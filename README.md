@@ -30,9 +30,10 @@ let html = """
 // initialize parser
 let parser = NDHpple(HTMLData: html)
 
-let htmlNodes = parser.search(withQuery: "//p[1]")
 let pNodes = parser.search(withQuery: "//p")
-result.flatMap { $0.text }.forEach { 
-        print($0)
-}
+print(pNodes[0].text) // "My first paragraph."
+print(pNodes[1].text) // "My last paragraph."
+
+let pNode = parser.peekAtSearch(withQuery: "//p[1]")
+print(pNode?.text ?? "") // "My first paragraph."
 ```
