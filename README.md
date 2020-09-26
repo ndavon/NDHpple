@@ -1,6 +1,6 @@
 # DESCRIPTION
 
-NDHpple is a Swift wrapper on the XMLPathQuery library based on [Hpple](http://github.com/topfunky/hpple).
+NDHpple is a simplie Swift wrapper on the XMLPathQuery library based on [Hpple](http://github.com/topfunky/hpple).
 
 # CREDITS
 
