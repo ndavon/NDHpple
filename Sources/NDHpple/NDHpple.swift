@@ -28,8 +28,13 @@ public class NDHpple {
 
     /// Perform an Xpath query search
     public func search(withQuery query: String) -> [NDHppleElement] {
-        let nodes = try? PerformXPathQuery(data: data, query: query, isXML: isXML)
-        return nodes?.map{ NDHppleElement(node: $0) } ?? []
+        do {
+            let nodes = try PerformXPathQuery(data: data, query: query, isXML: isXML)
+            return nodes.map{ NDHppleElement(node: $0) }
+        } catch {
+            print("Perform Xpath query error: \(error)")
+        }
+        return []
     }
 
     /// Perform an Xpath query search then return the first element
