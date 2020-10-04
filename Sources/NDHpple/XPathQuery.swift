@@ -63,18 +63,18 @@ private func createNode(from currentNode: xmlNodePtr!) -> Node {
     var node = Node(minimumCapacity: 8)
 
     if let name = currentNode.pointee.name {
-        node[NDHppleNodeKey.Name] = String(cString: name) as AnyObject
+        node[NDHppleElement.NodeKey.name] = String(cString: name) as Any
     }
 
     if let content = currentNode.pointee.content {
-        node[NDHppleNodeKey.Content] = String(cString: content) as AnyObject
+        node[NDHppleElement.NodeKey.content] = String(cString: content) as Any
     }
     
     if let attributes = currentNode.pointee.properties {
         let attributeArray = createAttributes(attributes: attributes)
         
         if !attributeArray.isEmpty {
-            node[NDHppleNodeKey.Attributes] = attributeArray as AnyObject
+            node[NDHppleElement.NodeKey.attributes] = attributeArray as Any
         }
     }
     
@@ -82,7 +82,7 @@ private func createNode(from currentNode: xmlNodePtr!) -> Node {
         let childArray = XmlNodeList(head: children).map(createNode)
 
         if !childArray.isEmpty {
-            node[NDHppleNodeKey.Children] = childArray as AnyObject
+            node[NDHppleElement.NodeKey.children] = childArray as Any
         }
     }
     
@@ -90,7 +90,7 @@ private func createNode(from currentNode: xmlNodePtr!) -> Node {
         xmlNodeDump(buffer, currentNode.pointee.doc, currentNode, 0, 0)
     
         let rawContent = String(cString: buffer.pointee.content)
-        node[NDHppleNodeKey.Raw] = rawContent as AnyObject 
+        node[NDHppleElement.NodeKey.raw] = rawContent as Any
     
         do { xmlBufferFree(buffer) }
     }

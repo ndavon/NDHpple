@@ -28,28 +28,61 @@ final class NDHppleTests: XCTestCase {
 
         let parser = NDHpple(HTMLData: html)
 
-        // Get "html" node
-        let htmlNodes = parser.search(withQuery: "/html")
-        XCTAssertEqual(htmlNodes.count, 1)
+        XCTContext.runActivity(named: "Get 'html' node") { _ in
+            let htmlNodes = parser.search(withQuery: "/html")
+            XCTAssertEqual(htmlNodes.count, 1)
+        }
 
-        // Get all "p" nodes
-        let pNodes = parser.search(withQuery: "//p")
-        XCTAssertEqual(pNodes.count, 8)
+        XCTContext.runActivity(named: "Get all 'p' nodes") { _ in
+            let pNodes = parser.search(withQuery: "//p")
+            XCTAssertEqual(pNodes.count, 8)
+        }
 
-        // Get all "p" nodes that have attribute "class" with value "hidden"
-        let hiddenPNodes = parser.search(withQuery: "//p[@class='hidden']")
-        XCTAssertEqual(hiddenPNodes.count, 1)
-        XCTAssertEqual(hiddenPNodes[0].text, "My third paragraph.")
+        XCTContext.runActivity(named: "Get all 'p' nodes that have attribute 'class' with value 'hidden'") { _ in
+            let hiddenPNodes = parser.search(withQuery: "//p[@class='hidden']")
+            XCTAssertEqual(hiddenPNodes.count, 1)
+            XCTAssertEqual(hiddenPNodes[0].text, "My third paragraph.")
+        }
 
-        // Get last "p" node inside the first div
-        let div1lastPNodes = parser.search(withQuery: "//div[1]/p[last()]")
-        XCTAssertEqual(div1lastPNodes.count, 1)
-        XCTAssertEqual(div1lastPNodes[0].text, "My fourth paragraph.")
+        XCTContext.runActivity(named: "Get last 'p' node inside the first div") { _ in
+            let div1lastPNodes = parser.search(withQuery: "//div[1]/p[last()]")
+            XCTAssertEqual(div1lastPNodes.count, 1)
+            XCTAssertEqual(div1lastPNodes[0].text, "My fourth paragraph.")
+        }
 
-        // Get last "p" node inside the second div
-        let div2lastPNodes = parser.search(withQuery: "//div[2]/p[last()]")
-        XCTAssertEqual(div2lastPNodes.count, 1)
-        XCTAssertEqual(div2lastPNodes[0].text, "Last paragraph.")
+        XCTContext.runActivity(named: "Get last 'p' node inside the second div") { _ in
+            let div2lastPNodes = parser.search(withQuery: "//div[2]/p[last()]")
+            XCTAssertEqual(div2lastPNodes.count, 1)
+            XCTAssertEqual(div2lastPNodes[0].text, "Last paragraph.")
+        }
+
+
+        try XCTContext.runActivity(named: "Search first div with xpath. Then search in results the element with attributed class='hidden'") { _ in
+            let nodesInDiv = try XCTUnwrap(parser.peekAtSearch(withQuery: "//div[1]"))
+            XCTAssertTrue(nodesInDiv.hasChildren)
+
+            // For educational purposes search using childrenForClass.
+            // Xpath query can solve this problem in an easier way. See next activity.
+            let hiddenElements = nodesInDiv.children(forClass: "hidden")
+            XCTAssertEqual(hiddenElements.count, 1)
+            XCTAssertEqual(hiddenElements.first?.children.first?.content, "My third paragraph.")
+
+            // Since it is the first element in the results, firstChild(forClass:) also works
+            let hiddentElement = try XCTUnwrap(nodesInDiv.firstChild(forClass: "hidden"))
+            XCTAssertEqual(hiddentElement.children.first?.content, "My third paragraph.")
+
+            // Get element and subelement entire string
+            XCTAssertEqual(hiddentElement.raw, "<p class=\"hidden\">My third paragraph.</p>")
+            XCTAssertFalse(hiddentElement.isText) // because it is a p element
+            XCTAssertTrue(hiddentElement.children.first?.isText == true)
+        }
+
+        try XCTContext.runActivity(named: "Search first div then p with class hidden with xpath.") { _ in
+            let hiddenP = try XCTUnwrap(parser.peekAtSearch(withQuery: "//div[1]/p[@class='hidden']"))
+            XCTAssertEqual(hiddenP.raw, "<p class=\"hidden\">My third paragraph.</p>")
+            XCTAssertFalse(hiddenP.isText) // because it is a p element
+            XCTAssertTrue(hiddenP.children.first?.isText == true)
+        }
     }
 
     func testBasicXml() throws {
