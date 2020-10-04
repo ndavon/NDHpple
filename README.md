@@ -3,6 +3,7 @@
 NDHpple is a simple Swift wrapper on the XMLPathQuery library based on [Hpple](http://github.com/topfunky/hpple).
 
 [![Actions Status](https://github.com/nacho4d/NDHpple/workflows/Swift/badge.svg)](https://github.com/nacho4d/NDHpple/actions)
+[![codecov.io](https://codecov.io/github/nacho4d/NDHpple/coverage.svg?branch=master)](https://codecov.io/github/nacho4d/NDHpple?branch=master)
 
 # CREDITS
 
