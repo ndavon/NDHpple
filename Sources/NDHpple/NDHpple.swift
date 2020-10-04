@@ -9,19 +9,19 @@
 import Foundation
 
 public class NDHpple {
-    
+
     private let data: String
     private let isXML: Bool
-    
+
     public init(data: String, isXML: Bool) {
         self.data = data
         self.isXML = isXML
     }
-    
+
     public convenience init(XMLData: String) {
         self.init(data: XMLData, isXML: true)
     }
-    
+
     public convenience init(HTMLData: String) {
         self.init(data: HTMLData, isXML: false)
     }
@@ -30,7 +30,7 @@ public class NDHpple {
     public func search(withQuery query: String) -> [NDHppleElement] {
         do {
             let nodes = try PerformXPathQuery(data: data, query: query, isXML: isXML)
-            return nodes.map{ NDHppleElement(node: $0) }
+            return nodes.map { NDHppleElement(node: $0) }
         } catch {
             print("Perform Xpath query error: \(error)")
         }

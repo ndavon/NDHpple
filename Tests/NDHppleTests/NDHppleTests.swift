@@ -1,6 +1,6 @@
 import Foundation
-import XCTest
 import NDHpple
+import XCTest
 
 final class NDHppleTests: XCTestCase {
 
@@ -56,8 +56,8 @@ final class NDHppleTests: XCTestCase {
             XCTAssertEqual(div2lastPNodes[0].text, "Last paragraph.")
         }
 
-
-        try XCTContext.runActivity(named: "Search first div with xpath. Then search in results the element with attributed class='hidden'") { _ in
+        try XCTContext.runActivity(named: "Search first div with xpath. Then search in results the element with attributed class='hidden'")
+        { _ in
             let nodesInDiv = try XCTUnwrap(parser.peekAtSearch(withQuery: "//div[1]"))
             XCTAssertTrue(nodesInDiv.hasChildren)
 
@@ -73,14 +73,14 @@ final class NDHppleTests: XCTestCase {
 
             // Get element and subelement entire string
             XCTAssertEqual(hiddentElement.raw, "<p class=\"hidden\">My third paragraph.</p>")
-            XCTAssertFalse(hiddentElement.isText) // because it is a p element
+            XCTAssertFalse(hiddentElement.isText)  // because it is a p element
             XCTAssertTrue(hiddentElement.children.first?.isText == true)
         }
 
         try XCTContext.runActivity(named: "Search first div then p with class hidden with xpath.") { _ in
             let hiddenP = try XCTUnwrap(parser.peekAtSearch(withQuery: "//div[1]/p[@class='hidden']"))
             XCTAssertEqual(hiddenP.raw, "<p class=\"hidden\">My third paragraph.</p>")
-            XCTAssertFalse(hiddenP.isText) // because it is a p element
+            XCTAssertFalse(hiddenP.isText)  // because it is a p element
             XCTAssertTrue(hiddenP.children.first?.isText == true)
         }
     }

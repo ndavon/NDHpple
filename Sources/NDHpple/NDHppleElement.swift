@@ -8,30 +8,30 @@
 
 import Foundation
 
-public typealias Node = [String:Any]
-public typealias Attributes = [String:Node]
+public typealias Node = [String: Any]
+public typealias Attributes = [String: Node]
 
 public class NDHppleElement {
 
     struct NodeKey {
         /// nodeContent
-        static let content      = "nodeContent"
+        static let content = "nodeContent"
         /// nodeName
-        static let name         = "nodeName"
+        static let name = "nodeName"
         /// nodeChildArray
-        static let children     = "nodeChildArray"
+        static let children = "nodeChildArray"
         /// nodeAttributeArray
-        static let attributes   = "nodeAttributeArray"
+        static let attributes = "nodeAttributeArray"
         /// rawValue
-        static let raw          = "rawValue"
+        static let raw = "rawValue"
     }
-    
+
     private let node: Node
     public let children: [NDHppleElement]
     public let attributes: Attributes
 
     init(node: Node) {
-        
+
         self.node = node
         self.children = (self.node[NodeKey.children] as? [Node] ?? []).map(NDHppleElement.init)
         self.attributes = self.node[NodeKey.attributes] as? Attributes ?? [:]
@@ -44,14 +44,14 @@ public class NDHppleElement {
 }
 
 extension NDHppleElement {
-    
+
     public var raw: String? { return self[NodeKey.raw] as? String }
     public var content: String? { return self[NodeKey.content] as? String }
     public var name: String? { return self[NodeKey.name] as? String }
 }
 
 extension NDHppleElement {
-    
+
     public var hasChildren: Bool { return !children.isEmpty }
     public var firstChild: NDHppleElement? { return children.first }
 
@@ -66,7 +66,7 @@ extension NDHppleElement {
     /// <elem>a</elem><elem class="warn">w</elem>
     /// ```
     public func children(forName name: String) -> [NDHppleElement] {
-        return children.filter{ $0.name == name }
+        return children.filter { $0.name == name }
     }
 
     /// Get first child filtered tag name.
@@ -113,16 +113,17 @@ extension NDHppleElement {
 }
 
 extension NDHppleElement {
-    
+
     public var isText: Bool { return name == "text" && content != nil }
     public var firstTextChild: NDHppleElement? { return firstChild(forName: "text") }
     public var text: String? { return firstTextChild?.content }
 }
 
 #if DEBUG
-extension NDHppleElement: CustomDebugStringConvertible {
-    public var debugDescription: String {
-        return "<NDHppleElement node: \(node.description), attributes: \(attributes.description), children: \(children.count)>"
+    extension NDHppleElement: CustomDebugStringConvertible {
+        public var debugDescription: String {
+            return
+                "<NDHppleElement node: \(node.description), attributes: \(attributes.description), children: \(children.count)>"
+        }
     }
-}
 #endif
