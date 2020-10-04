@@ -13,16 +13,17 @@ public typealias Attributes = [String: Node]
 
 public class NDHppleElement {
 
-    struct NodeKey {
-        /// nodeContent
+    /// Keys to access data and metadata of nodes.
+    public struct NodeKey {
+        /// Key "nodeContent".
         static let content = "nodeContent"
-        /// nodeName
+        /// Key "nodeName".
         static let name = "nodeName"
-        /// nodeChildArray
+        /// Key "nodeChildArray".
         static let children = "nodeChildArray"
-        /// nodeAttributeArray
+        /// Key "nodeAttributeArray".
         static let attributes = "nodeAttributeArray"
-        /// rawValue
+        /// Key "rawValue".
         static let raw = "rawValue"
     }
 

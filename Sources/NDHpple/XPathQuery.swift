@@ -106,7 +106,7 @@ enum QueryError: Error {
     case create
 }
 
-func PerformXPathQuery(data: String, query: String, isXML: Bool) throws -> [Node] {
+func performXPathQuery(data: String, query: String, isXML: Bool) throws -> [Node] {
 
     guard !data.isEmpty else { throw QueryError.empty }
 
