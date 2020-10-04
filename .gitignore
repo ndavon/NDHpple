@@ -1,2 +1,7 @@
-.swiftpm/
+# Finder indexing
 .DS_Store
+# spm directories
+.swiftpm/
+.build/
+# code coverage
+info.lcov
