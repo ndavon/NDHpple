@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class NDHpple {
+public struct NDHpple {
 
     private let data: String
     private let isXML: Bool
@@ -18,11 +18,11 @@ public class NDHpple {
         self.isXML = isXML
     }
 
-    public convenience init(XMLData: String) {
+    public init(XMLData: String) {
         self.init(data: XMLData, isXML: true)
     }
 
-    public convenience init(HTMLData: String) {
+    public init(HTMLData: String) {
         self.init(data: HTMLData, isXML: false)
     }
 

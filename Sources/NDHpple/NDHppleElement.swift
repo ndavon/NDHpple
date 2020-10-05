@@ -11,7 +11,7 @@ import Foundation
 public typealias Node = [String: Any]
 public typealias Attributes = [String: Node]
 
-public class NDHppleElement {
+public struct NDHppleElement {
 
     /// Keys to access data and metadata of nodes.
     public struct NodeKey {
