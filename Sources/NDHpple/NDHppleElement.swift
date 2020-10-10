@@ -8,72 +8,123 @@
 
 import Foundation
 
-struct NDHppleNodeKey {
-    static let Content      = "nodeContent"
-    static let Name         = "nodeName"
-    static let Children     = "nodeChildArray"
-    static let Attributes   = "nodeAttributeArray"
-    static let Raw          = "rawValue"
-}
+public typealias Node = [String: Any]
+public typealias Attributes = [String: Node]
 
-public typealias Node = [String:AnyObject]
-public typealias Attributes = [String:Node]
+public struct NDHppleElement {
 
-public class NDHppleElement {
-    
+    /// Keys to access data and metadata of nodes.
+    public struct NodeKey {
+        /// Key "nodeContent".
+        static let content = "nodeContent"
+        /// Key "nodeName".
+        static let name = "nodeName"
+        /// Key "nodeChildArray".
+        static let children = "nodeChildArray"
+        /// Key "nodeAttributeArray".
+        static let attributes = "nodeAttributeArray"
+        /// Key "rawValue".
+        static let raw = "rawValue"
+    }
+
     private let node: Node
     public let children: [NDHppleElement]
     public let attributes: Attributes
 
     init(node: Node) {
-        
+
         self.node = node
-        self.children = (self.node[NDHppleNodeKey.Children] as? [Node] ?? []).map(NDHppleElement.init)
-        self.attributes = self.node[NDHppleNodeKey.Attributes] as? Attributes ?? [:]
+        self.children = (self.node[NodeKey.children] as? [Node] ?? []).map(NDHppleElement.init)
+        self.attributes = self.node[NodeKey.attributes] as? Attributes ?? [:]
     }
 
-    public subscript(key: String) -> AnyObject? {
+    public subscript(key: String) -> Any? {
 
         return self.node[key]
     }
 }
 
 extension NDHppleElement {
-    
-    public var raw: String? { return self[NDHppleNodeKey.Raw] as? String }
-    public var content: String? { return self[NDHppleNodeKey.Content] as? String }
-    public var name: String? { return self[NDHppleNodeKey.Name] as? String }
+
+    public var raw: String? { return self[NodeKey.raw] as? String }
+    public var content: String? { return self[NodeKey.content] as? String }
+    public var name: String? { return self[NodeKey.name] as? String }
 }
 
 extension NDHppleElement {
-    
-    public var hasChildren: Bool { return !self.children.isEmpty }
-    public var firstChild: NDHppleElement? { return self.children.first }
-    
+
+    public var hasChildren: Bool { return !children.isEmpty }
+    public var firstChild: NDHppleElement? { return children.first }
+
+    /// Get all children filtered by tag name.
+    ///
+    /// Example: If self node is like:
+    /// ```
+    /// <node><elem>a</elem><elem class="warn">w</elem><li>c</li></node>
+    /// ```
+    /// rhen `node.children(forName: "elem")` will return array of 2 elements:
+    /// ```
+    /// <elem>a</elem><elem class="warn">w</elem>
+    /// ```
     public func children(forName name: String) -> [NDHppleElement] {
-        
-        return self.children.filter{ $0.name == name }
+        return children.filter { $0.name == name }
     }
-    
+
+    /// Get first child filtered tag name.
+    ///
+    /// Example: If self node is like:
+    /// ```
+    /// <node><elem>a</elem><elem class="warn">w</elem><li>c</li></node>
+    /// ```
+    /// then `node.firstChild(forName: "elem")` will return node:
+    /// ```
+    /// <elem>a</elem>
+    /// ```
     public func firstChild(forName name: String) -> NDHppleElement? {
-        
-        return self.children(forName: name).first
+        return children.first { return $0.name == name }
     }
-    
+
+    /// Get all nodes in children that have given parameter as class attribute.
+    ///
+    /// Example: If self node is like:
+    /// ```
+    /// <node><elem>a</elem><elem class="warn">w</elem><li>c</li></node>
+    /// ```
+    /// then `node.children(forClass: "warn")` will return array of 1 element:
+    /// ```
+    /// <elem class="warning">w</elem>
+    /// ```
     public func children(forClass class: String) -> [NDHppleElement] {
-        
-        return self.children.filter{ $0.attributes["class"]?[NDHppleNodeKey.Name] as? String == `class` }
+        return children.filter { $0.attributes["class"]?[NodeKey.content] as? String == `class` }
     }
-    
+
+    /// Extract first node in children that has given parameter as class attribute.
+    ///
+    /// Example: If self node is like:
+    /// ```
+    /// <node><elem>a</elem><elem class="warning">w</elem><elem>c</elem></node>
+    /// ```
+    /// then `node.firstChild(forClass: "warning")` will return node:
+    /// ```
+    /// <elem class="warning">w</elem>
+    /// ```
     public func firstChild(forClass class: String) -> NDHppleElement? {
-        
-        return self.children(forClass: `class`).first
+        return children.first { $0.attributes["class"]?[NodeKey.content] as? String == `class` }
     }
 }
 
 extension NDHppleElement {
-    
-    public var isText: Bool { return self.name == "text" && self.content != nil }
-    public var firstTextChild: NDHppleElement? { return self.firstChild(forName: "text") }
-    public var text: String? { return self.firstTextChild?.content }
+
+    public var isText: Bool { return name == "text" && content != nil }
+    public var firstTextChild: NDHppleElement? { return firstChild(forName: "text") }
+    public var text: String? { return firstTextChild?.content }
 }
+
+#if DEBUG
+    extension NDHppleElement: CustomDebugStringConvertible {
+        public var debugDescription: String {
+            return
+                "<NDHppleElement node: \(node.description), attributes: \(attributes.description), children: \(children.count)>"
+        }
+    }
+#endif

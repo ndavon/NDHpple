@@ -1,13 +1,19 @@
+// swift-tools-version:5.2
+
 import PackageDescription
 
 let package = Package(
     name: "NDHpple",
-    targets: [
-        Target(
-            name: "Example",
-            dependencies: [ .Target(name: "NDHpple") ]),
-        Target(
-            name: "NDHpple")
+    products: [
+        .library(
+            name: "NDHpple",
+            targets: ["NDHpple"])
     ],
-    dependencies: [ .Package(url: "http://github.com/ndavon/Clibxml2", majorVersion: 1) ]
+    targets: [
+        .target(
+            name: "NDHpple"),
+        .testTarget(
+            name: "NDHppleTests",
+            dependencies: ["NDHpple"]),
+    ]
 )
