@@ -26,7 +26,7 @@ final class NDHppleTests: XCTestCase {
             </html>
             """
 
-        let parser = NDHpple(HTMLData: html)
+        let parser = NDHpple(htmlData: html)
 
         XCTContext.runActivity(named: "Get 'html' node") { _ in
             let htmlNodes = parser.search(withQuery: "/html")
@@ -104,7 +104,7 @@ final class NDHppleTests: XCTestCase {
             </bookstore>
             """
 
-        let parser = NDHpple(XMLData: xml)
+        let parser = NDHpple(xmlData: xml)
 
         // Get "html" node
         let htmlNodes = parser.search(withQuery: "/root")
@@ -134,7 +134,7 @@ final class NDHppleTests: XCTestCase {
     }
 
     func testWrongQuery() throws {
-        let parser = NDHpple(XMLData: "")
+        let parser = NDHpple(xmlData: "")
         let nodes = parser.search(withQuery: "/root")
         XCTAssertEqual(nodes.count, 0)
     }

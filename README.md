@@ -17,7 +17,7 @@ Use swift package manager with url of this repository and then select a version.
 
 See [Tests/NDHppleTests/NDHppleTests.swift](http://github.com/nacho4d/NDHpple/tree/master/Tests/NDHppleTests/NDHppleTests.swift) for more detailed samples.
 
-```
+```swift
 import NDHpple
 
 // read xml into a string
@@ -31,7 +31,7 @@ let html = """
     </html>
     """
 // initialize parser
-let parser = NDHpple(HTMLData: html)
+let parser = NDHpple(htmlData: html)
 
 let pNodes = parser.search(withQuery: "//p")
 print(pNodes[0].text) // "My first paragraph."

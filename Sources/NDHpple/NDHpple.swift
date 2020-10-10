@@ -18,12 +18,12 @@ public struct NDHpple {
         self.isXML = isXML
     }
 
-    public init(XMLData: String) {
-        self.init(data: XMLData, isXML: true)
+    public init(xmlData: String) {
+        self.init(data: xmlData, isXML: true)
     }
 
-    public init(HTMLData: String) {
-        self.init(data: HTMLData, isXML: false)
+    public init(htmlData: String) {
+        self.init(data: htmlData, isXML: false)
     }
 
     /// Perform an Xpath query search.
